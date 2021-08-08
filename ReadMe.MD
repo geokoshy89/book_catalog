@@ -1,0 +1,368 @@
+Virtual environment in python provides isolation for application written python inorder to avoid version conflicts.This
+can be installed as below:
+
+```
+pip3 install virtualenv 
+```
+
+We can manually create virtual environment as follows. Create a directory and from inside the folder run below command:
+
+```
+virtualenv <environment name>
+```
+
+If flaskenv is the name of the environment, run below command to activate environment:
+
+```
+flaskenv/bin/activate.bat
+```
+
+Now for installing flask into the project run:
+
+```
+pip3 install flask
+```
+
+To deactivate environment:
+
+```
+deactivate
+```
+
+In pycharm we have UI guided creation of environment. In community edition we have to create flask main file our self.
+Check the project for creation of api ,api with query and path variables. Jinja2 package can be used with flask for
+writing logic in html files. Html files can be added in templates folder.Js,images and css can be added in static
+folder. Macros enable us to create reusable pieces of html logic in html. This is part of Jinja2. In jinja2 value can
+print as below:
+
+```
+{{variablename}}
+```
+
+Filter can be used to transform value of variables:
+
+```
+{{variablename|capitalize}}
+```
+
+Multiple filters can be applied with multiple pipes. The program constructs like if,elif,for etc have to be written as
+below:
+
+```
+{%for movie,length in movies.items()%}
+...
+{%endfor%}
+```
+
+Where movies is a dictionary. Start database with below command:
+
+```
+docker run -d --rm --name some-postgres -p 5432:5432 -e POSTGRES_PASSWORD=password  -e PGDATA=/var/lib/postgresql/data/pgdata -v postgrescustom:/var/lib/postgresql/data  postgres
+```
+
+SQL alchemy is the ORM tool that cn be used with flask. It can be installed as below:
+
+```
+pip3 install Flask-SQLAlchemy
+```
+
+Postgres driver can be installed as below:
+
+```
+pip3 install psycopg2
+```
+
+We can use pgadmin tool for a GUI application to connect and use wih postgres db. We can add ORM class mapping for table
+as below:
+
+```
+class Publication(db.Model):
+    __tablename__ = "publication"#Real table name
+
+    #Columns
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+   #Init(init constructor) and repr are standard functions in python classes for initialization and to string like functionaliy resepectively.
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
+    def __repr__(self):
+        return "The id is {} name is {}".format(self.id, self.name)
+
+
+if __name__ == "__main__":
+    db.create_all()#This line will create table specified thru Orm class,if already present in db nothing will de done
+    app.run(debug=True)
+```
+
+The db configuration are specified in the dictionary for the same available in flask instance:
+
+```
+app = Flask(__name__)
+
+app.config.update(
+    SECRET_KEY='topsecret',
+    SQLALCHEMY_DATABASE_URI='postgresql://postgres:password@localhost/catalog_db',
+    SQLALCHEMY_TRACK_MODIFICATIONS=False
+)
+db = SQLAlchemy(app) # creates db instance thru api for Orm,this line connects db to flask app
+```
+We can play with CRUD operations from python console:
+```
+from run import db,Publication
+```
+Importing db instance and Publication table created in previous section.
+We can create instance of Publication :
+```
+pub=Publication(100,'Oxford Publications')
+```
+Type pub:
+```
+pub
+Result will be:
+The id is 100 name is Oxford Publications#repr implemented
+```
+We can individually access the properties as well like pub.id and pub.name in the console.
+We can run the function dir over pub to see all functions and properties in pub instance:
+```
+dir(pub)
+o/p;
+['__abstract__', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__mapper__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__table__', '__tablename__', '__weakref__', '_sa_class_manager', '_sa_instance_state', '_sa_registry', 'id', 'metadata', 'name', 'query', 'query_class', 'registry']
+```
+Also type function can be run to find out the modula and class type:
+```
+type(pub)
+o/p;
+<class 'run.Publication'>
+```
+Insert data to db, add the instance to db session as below:
+```
+db.session.add(pub)
+db.session.commit()
+```
+It is good to use dir and type methods to find out more about the object instance.
+We can add multiple objects as list to db as below:
+```
+paramount=Publication(102,'Paramount Press')
+oracle=Publication(103,'Oracle Inc')
+db.session.add_all([paramount,oracle])
+db.session.commit()
+```
+session object is a temporary storage in memory where uncommitted transactions can exist.
+It is like a staging zone. The data will be gone if the session is closed, otherwise 
+we have to commit the data to database. 
+In Sql alchemy if we do not specify the value for primary key, it will be autogenerated.
+The db records for Book mapping class can be added as below using python console:
+```
+>>> from run import db,Book
+>>> b1=Book("Milik's Delivery Service","William Dobelli",3.9,"epub","broom-145379.svg",123,100)
+>>> b2=Book("The secret life of walter kitty","Kitty Stiller",4.1,"Hard cover","cat-150306.svg",133,100)
+>>> db.session.add_all([b1,b2])
+>>> db.session.commit()
+```
+If we run dir(Book) we can see inbuilt function called query.
+To query all records we can run class_name.query.all() notation.
+```
+all=Book.query.all()
+type(all) # list
+all[:3]# First three records
+first=Book.query.first() #First element in the result
+```
+SQL alchemy provides function called filter_by() to filter
+results based on criteria
+```
+filter_data=Book.query.filter_by(format='ePub')
+```
+The above code will only generate a query object. Inorder get then
+results:
+```
+filter_data=Book.query.filter_by(format='ePub').all()
+```
+There is a method get(primary_key) to fetch data by primary key:
+```
+pk= Book.query.get(1)
+```
+If this record is not there,an error will be thrown.
+We can limit the number of results:
+```
+Book.qery.limit(5).all()
+```
+order_by() method can be used to sort data:
+```
+Book.query.order_by(Book.title).all()
+```
+This fetches all book data and sorts them in alphabetic order
+of book title. We can also chain various methods as below:
+```
+Book.query.filter_by(format='Paperback').order_by(Book.title).all()
+```
+Query data from two tables based on foreign key:
+```
+result=Publication.query.filter_by(name='Broadway Press').first()
+Book.query.filter_by(pub_id=result.id).all()
+```
+###Updating and deleting records 
+Select record for operation
+```
+u=Book.query.get(16)
+```
+We can update the record in the session as below:
+```
+u.format='Hardcover'
+#commit
+db.session.commit()
+```
+Inorder to delete find the records as earlier:
+```
+x=Book.query.get(28)
+#Call delete on session with this object
+db.session.delete(x)
+db.session.commit()
+```
+Deleting record from parent table is different:
+```
+p=Publication.query.get(6)
+p.name
+```
+unless we delete the child records of this ,we won't be able to delte
+the same. We can delete all the child records in book table as
+below:
+```
+Book.query.filter_by(pub_id=6).delete()
+db.session.commit()
+```
+Now we can delete publisher as below:
+```
+Publication.query.filter_by(id=6).delete()
+db.session.commit()
+```
+###Git
+```
+git push -u origin master
+```
+u arg is used to remember the parameters passed,so that next
+time we can simply push .We can remove files from git reote repo
+only by below command:
+```
+git rm --cached "sample.txt"
+git commit -m "Remvoed"
+git push
+```
+Without cached arg ,it will be removed from both local and 
+remote repo.
+###Flask context variables:
+Request context and application context are the two type of 
+context variables available from flask.These variables 
+are created by  flask when user submit a request. They will
+be removed once request is successfully served. There is
+also a session object which will created when user logs in and
+will be destroyed as user logs out. The session may contain
+sensitive data, and we can secure this data using security key
+added as part of app configuration dictionary. The key can be
+used by other libraries and even cookies. Session like request
+object is a python dictionary ,which holds user data in 
+key value format.
+###Decorator associated with request and global variable g
+To use global variable import it
+```
+from flask import g
+```
+There are 4 request decorators:
+```
+@app.before_request -executes code after every get request(Eg check login status or establish db connection)
+@app.before_first_request- before the very first request
+@app.after_request- after the get request only if exception comes up
+@app.teardown_request- executes code after every request
+```
+###Python packages:
+Packaging is to organize code  into modules or packages that do a specific task.
+A package is a directory with init.py file. We can create
+a folder to define project configurations. We can even reuse the packages
+thus defined in other flask applications if required.
+###Flask Blueprints:
+Blueprint- a set of operations that can be registered on an application.
+It simplifies how applications work. We generally define blueprints
+in init.py file of package. __name__ is a special python variable
+which defines a scope. This is the location where  blueprint
+is stored.
+```
+from flask import BluePrint
+main=BluePrint('main',__name__,template_folder='templates')
+```
+template_folder argument defines the folder with html. We are letting
+the blueprint know where to find the templates. We can dynamically
+switch the configuration to use by below approach in a flask application
+written with scalable architecture:
+```
+# app/__init__.py
+def create_app(config_type):  # dev,production,test
+    app = Flask(__name__)
+    configuration = os.path.join(os.getcwd(), 'config', config_type + '.py')
+    app.config.from_pyfile(configuration)
+    
+    #import blueprint for catalog
+    from app.catalog import main#app module,not instance
+    app.register_blueprint(main)#flask app instance
+    return app
+```
+We have to define routes in routes python file inside catalog module.
+This route hs to import the blueprint. This route has to e imported
+in the nit py file of the catalog module. Inorder to avoid any conflicts
+called circular reference due to this we can import route
+at the end of the init py file. Since we do not have access to app
+instance as global variable we can use blueprint instance of main
+to define routes in route py file:
+```
+@main.route("/")
+def something():
+   return "Hi"
+```
+We have to define a python file to convenient execute the
+application at top level.At root working directory we have to
+create root.py:
+```
+from app import create_app
+
+if __name__ == "__main__":
+    flask_app = create_app("dev")
+    flask_app.run(host='0.0.0.0', debug=True)
+```
+Run the app as below:
+```
+python run.py
+```
+We can add href for route as below:
+```
+<p><a href="{{url_for('main.display_publisher',publisher_id=book.pub_id)}}">Publisher id : {{book.pub_id}}</a></p>
+```
+where main is the blueprint name
+###Twitter bootstrap
+A framework for building responsive websites using html,css and javascript
+.We can use flask version of bootstrap:
+```
+pip3 install flask-bootstrap
+```
+
+###Jinja2 template inheritance
+Helps repeating same code without copying.Allowing reuse.
+Similar to tiles framework used with struts.Extend the html with below
+instuction in html file:
+```
+{%extends 'layout.html'%}
+```
+###Authentication:
+Now we have to add authentication package.For this
+create a blueprint object in init py file of the module and
+register the same in the root init py file.
+
+Flask wtf package is used for managing forms in flask.It can be
+installed as below:
+```
+pip3 install Flask-WTF
+```
+
+Request.args contain dictionary of GET request data. For post 
+request data will be available in 'request.form' dictionary.
+Along with post we will also get csrf token,which is defined as hidden tag
+in form as shown in registration html file.
